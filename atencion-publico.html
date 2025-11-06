@@ -96,11 +96,13 @@
     .chart-container { max-width:320px; height:260px; margin:16px auto 0; }
     .records-table { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
     .table-header { background: var(--background-table-header); padding: 12px clamp(12px,2vw,18px); font-weight: 700; border-bottom:1px solid var(--border-default); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; color: var(--text); }
-    .filters { display:flex; gap:8px; flex-wrap:wrap; width:100%; justify-content:space-between; }
-    .filter-controls { display:flex; gap:8px; flex-wrap:wrap; }
-    .filter-controls > * { flex: 1 1 160px; min-width: 120px; }
+    .filters { display:flex; flex-direction: column; gap: 12px; width:100%; }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; align-items: center; }
+    .filter-row > * { flex: 1; min-width: 120px; }
+    .date-range { display: flex; gap: 8px; flex-wrap: wrap; }
+    .date-range > * { flex: 1; min-width: 140px; }
     .table-content { max-height: min(60vh, 560px); overflow-y:auto; }
-    .record { display:grid; grid-template-columns: 110px 80px 110px 1.2fr 1fr 120px; padding: 10px 12px; font-size:14px; border-bottom:1px solid var(--border-default); gap: 8px; align-items:center; }
+    .record { display:grid; grid-template-columns: 110px 80px 110px 1.2fr 1fr 90px; padding: 10px 12px; font-size:14px; border-bottom:1px solid var(--border-default); gap: 8px; align-items:center; }
     .record-type { font-size:12px; padding:2px 6px; border-radius:6px; text-align:center; font-weight:700; }
     .type-presencial { background:#eaf9ea; color:#2d9950; }
     .type-telefonica { background:#fff8e6; color:#b36a00; }
@@ -121,6 +123,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
     .pagination-controls select, .pagination-controls button {
       padding: 6px 10px;
@@ -132,11 +135,11 @@
       .stats { grid-template-columns: repeat(2, 1fr); }
       .record { grid-template-columns: 90px 70px 100px 1fr; }
       .record .record-actions { grid-column: 1 / -1; }
-      .filters { flex-direction: column; align-items: flex-start; }
-      .filter-controls { width: 100%; justify-content: flex-end; }
+      .filter-row { width: 100%; }
+      .date-range { width: 100%; }
     }
     /* Diseño tipo tarjetas en móviles */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .table-content { max-height: unset; }
       .stats { grid-template-columns: 1fr; }
       .record { grid-template-columns: 1fr 1fr; grid-template-areas:
@@ -153,9 +156,24 @@
       .record > div:nth-child(4) { grid-area: persona; }
       .record > div:nth-child(5) { grid-area: usuario; }
       .record > div:nth-child(6) { grid-area: acciones; }
-      .filters > * { flex: 1 1 100%; min-width: 0; }
-      .filter-controls { flex-direction: column; }
+      .filter-row { flex-direction: column; }
+      .filter-row > * { min-width: 100%; }
+      .date-range { flex-direction: column; }
+      .pagination-controls { 
+        justify-content: center; 
+        width: 100%; 
+        margin-top: 8px;
+      }
       .chart-container { width: 100%; height: 220px; }
+    }
+    @media (max-width: 480px) {
+      .pagination-controls {
+        flex-direction: column;
+        width: 100%;
+      }
+      .pagination-controls select, .pagination-controls button {
+        width: 100%;
+      }
     }
     /* Modal */
     .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); justify-content:center; align-items:center; z-index:1000; padding: 16px; }
@@ -163,6 +181,51 @@
     .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
     .modal-header h3 { margin:0; color: var(--text); }
     .close-btn { background:none; border:none; font-size:20px; cursor:pointer; color: var(--text); }
+    
+    /* Estilos para impresión */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .records-table, .records-table * {
+        visibility: visible;
+      }
+      .records-table {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+      }
+      .table-header, .record-actions {
+        display: none !important;
+      }
+      .record {
+        grid-template-columns: 110px 80px 110px 1.2fr 1fr !important;
+      }
+      .stats-print, .stats-print * {
+        visibility: visible;
+      }
+      .stats-print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+      }
+      .stats-print h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .stats-print .stats {
+        margin-bottom: 20px;
+      }
+      .stats-print .chart-container {
+        max-width: 100%;
+        height: 300px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -231,15 +294,19 @@
       <div class="table-header">
         <span>Registro de Atenciones</span>
         <div class="filters">
-          <div class="filter-controls">
-            <input type="date" id="filterDate">
+          <!-- Primera fila: Filtros de búsqueda -->
+          <div class="filter-row">
+            <div class="date-range">
+              <input type="date" id="filterDateStart" placeholder="Fecha inicio">
+              <input type="date" id="filterDateEnd" placeholder="Fecha fin">
+            </div>
             <select id="filterUser"><option value="">Todos los usuarios</option></select>
             <input type="text" id="filterPerson" placeholder="Buscar persona...">
           </div>
           
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <div id="paginationControls" class="pagination-controls">
-              </div>
+          <!-- Segunda fila: Paginación y botón imprimir -->
+          <div class="filter-row">
+            <div id="paginationControls" class="pagination-controls"></div>
             <button id="printBtn" class="btn btn-secondary">🖨️ Imprimir Listado</button>
           </div>
         </div>
@@ -307,6 +374,14 @@
     const fmtFecha = (d)=> d ? d.toLocaleDateString("es-AR") : "-"; // DD/MM/AAAA
     const fmtHora = (d)=> d ? d.toLocaleTimeString("es-AR", {hour12:false, hour:"2-digit", minute:"2-digit"}) : "--:--";
 
+    // Convertir fecha DD/MM/AAAA a objeto Date
+    function parseFecha(ddmmyyyy) {
+      if (!ddmmyyyy) return null;
+      const parts = ddmmyyyy.split('/');
+      if (parts.length !== 3) return null;
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
     function esFeriado(date){
       const ddmmyyyy = fmtFecha(date);
       return FERIADOS.includes(ddmmyyyy);
@@ -340,21 +415,173 @@
     function bindPrinting(){
       document.getElementById("printBtn").addEventListener("click", ()=>{
         const w = window.open("", "_blank");
-        const html = document.querySelector(".records-table").outerHTML;
-        w.document.write(`<html><head><title>Listado</title><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>${html}</body></html>`);
-        w.document.close(); w.focus(); w.print();
+        const filterDateStart = document.getElementById("filterDateStart").value;
+        const filterDateEnd = document.getElementById("filterDateEnd").value;
+        const filterUser = document.getElementById("filterUser").value;
+        const filterPerson = document.getElementById("filterPerson").value;
+        
+        // Obtener los registros filtrados actuales
+        const filteredRecords = getFilteredRecords(recordsCache);
+        
+        // Crear tabla para imprimir
+        let tableHTML = `
+          <table style="width:100%; border-collapse:collapse; margin-top:20px;">
+            <thead>
+              <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
+                <th style="padding:10px; text-align:left;">Fecha</th>
+                <th style="padding:10px; text-align:left;">Hora</th>
+                <th style="padding:10px; text-align:left;">Tipo</th>
+                <th style="padding:10px; text-align:left;">Persona</th>
+                <th style="padding:10px; text-align:left;">Usuario</th>
+              </tr>
+            </thead>
+            <tbody>`;
+        
+        filteredRecords.forEach(r => {
+          const fechaObj = r.timestamp ? new Date(r.timestamp) : null;
+          const fechaStr = fmtFecha(fechaObj);
+          const horaStr  = r.time || fmtHora(fechaObj);
+          const tipo = r.type ? (r.type[0].toUpperCase() + r.type.slice(1)) : "-";
+          
+          tableHTML += `
+            <tr style="border-bottom:1px solid #dee2e6;">
+              <td style="padding:10px;">${fechaStr}</td>
+              <td style="padding:10px;">${horaStr}</td>
+              <td style="padding:10px;">${tipo}</td>
+              <td style="padding:10px;">${r.personName || ""}</td>
+              <td style="padding:10px;">${r.assignedUser || ""}</td>
+            </tr>`;
+        });
+        
+        tableHTML += `</tbody></table>`;
+        
+        // Crear título según los filtros aplicados
+        let titulo = "Listado Completo de Atenciones";
+        if (filterDateStart && filterDateEnd) {
+          titulo = `Atenciones del ${filterDateStart} al ${filterDateEnd}`;
+        } else if (filterDateStart) {
+          titulo = `Atenciones del ${filterDateStart}`;
+        } else if (filterDateEnd) {
+          titulo = `Atenciones hasta el ${filterDateEnd}`;
+        }
+        
+        if (filterUser) {
+          titulo += ` - Usuario: ${filterUser}`;
+        }
+        
+        if (filterPerson) {
+          titulo += ` - Persona: ${filterPerson}`;
+        }
+        
+        w.document.write(`
+          <html>
+            <head>
+              <title>Listado de Atenciones</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { margin-bottom: 10px; }
+                .filters-info { margin-bottom: 20px; color: #666; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #f8f9fa; }
+              </style>
+            </head>
+            <body>
+              <h1>Registro de Atenciones - Defensoría Civil y Comercial 6</h1>
+              <div class="filters-info">
+                <p><strong>${titulo}</strong></p>
+                <p>Fecha de impresión: ${fmtFecha(new Date())}</p>
+                <p>Total de registros: ${filteredRecords.length}</p>
+              </div>
+              ${tableHTML}
+            </body>
+          </html>
+        `);
+        w.document.close();
+        w.focus();
+        w.print();
       });
+      
       document.getElementById("printStatsBtn").addEventListener("click", ()=>{
         const w = window.open("", "_blank");
-        const html = document.getElementById("statsCard").outerHTML;
-        w.document.write(`<html><head><title>Estadísticas</title><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>${html}</body></html>`);
-        w.document.close(); w.focus(); w.print();
+        const total = document.getElementById("totalAttentions").textContent;
+        const presencial = document.getElementById("presentialCount").textContent;
+        const telefonica = document.getElementById("phoneCount").textContent;
+        const whatsapp = document.getElementById("whatsappCount").textContent;
+        const zimbra = document.getElementById("zimbraCount").textContent;
+        
+        // Obtener la imagen del gráfico
+        const chartImage = statsChart.toBase64Image();
+        
+        w.document.write(`
+          <html>
+            <head>
+              <title>Estadísticas de Atención</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .stats-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+                .stat-box { border: 1px solid #ccc; padding: 10px; text-align: center; }
+                .stat-number { font-size: 24px; font-weight: bold; }
+                .stat-label { font-size: 14px; }
+                .chart-container { text-align: center; margin-top: 20px; }
+                .details { margin-top: 20px; }
+                .details h3 { margin-bottom: 10px; }
+                .details ul { list-style-type: none; padding: 0; }
+                .details li { margin-bottom: 5px; padding: 5px; background: #f8f9fa; border-radius: 4px; }
+              </style>
+            </head>
+            <body>
+              <h1>Estadísticas de Atención - Defensoría Civil y Comercial 6</h1>
+              <p>Fecha de impresión: ${fmtFecha(new Date())}</p>
+              <div class="stats-container">
+                <div class="stat-box">
+                  <div class="stat-number">${total}</div>
+                  <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number">${presencial}</div>
+                  <div class="stat-label">Presenciales</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number">${telefonica}</div>
+                  <div class="stat-label">Telefónicas</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number">${whatsapp}</div>
+                  <div class="stat-label">WhatsApp</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number">${zimbra}</div>
+                  <div class="stat-label">Zimbra</div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <img src="${chartImage}" alt="Gráfico de Estadísticas" style="max-width:100%;">
+              </div>
+              <div class="details">
+                <h3>Detalle por Tipo de Atención</h3>
+                <ul>
+                  <li><strong>Presenciales:</strong> ${presencial} atenciones</li>
+                  <li><strong>Telefónicas:</strong> ${telefonica} atenciones</li>
+                  <li><strong>WhatsApp:</strong> ${whatsapp} atenciones</li>
+                  <li><strong>Zimbra:</strong> ${zimbra} atenciones</li>
+                </ul>
+              </div>
+            </body>
+          </html>
+        `);
+        w.document.close();
+        w.focus();
+        w.print();
       });
     }
 
     function bindFilters(){
       // Se añade el reinicio de la página actual al cambiar los filtros
-      document.getElementById("filterDate").addEventListener("change", ()=> { currentPage = 1; renderRecords(recordsCache); });
+      document.getElementById("filterDateStart").addEventListener("change", ()=> { currentPage = 1; renderRecords(recordsCache); });
+      document.getElementById("filterDateEnd").addEventListener("change", ()=> { currentPage = 1; renderRecords(recordsCache); });
       document.getElementById("filterUser").addEventListener("change", ()=> { currentPage = 1; renderRecords(recordsCache); });
       document.getElementById("filterPerson").addEventListener("input", ()=> { currentPage = 1; renderRecords(recordsCache); });
     }
@@ -423,7 +650,7 @@
       for (let i = 1; i <= totalPages; i++) {
         const option = document.createElement("option");
         option.value = i;
-        option.textContent = `Página ${i} de ${totalPages}`;
+        option.textContent = `Página ${i}`;
         if (i === currentPage) option.selected = true;
         select.appendChild(option);
       }
@@ -438,26 +665,44 @@
     }
     // FIN FUNCIÓN DE PAGINACIÓN
 
+    // Función para obtener registros filtrados (usada en renderRecords y en impresión)
+    function getFilteredRecords(records) {
+      const filterDateStart = document.getElementById("filterDateStart").value; // YYYY-MM-DD
+      const filterDateEnd = document.getElementById("filterDateEnd").value; // YYYY-MM-DD
+      const filterUser = document.getElementById("filterUser").value;
+      const filterPerson = document.getElementById("filterPerson").value.toLowerCase();
+      
+      return records.filter(r => {
+        const fechaObj = r.timestamp ? new Date(r.timestamp) : null;
+        const iso = fechaObj ? new Date(fechaObj.getTime() - (fechaObj.getTimezoneOffset()*60000)).toISOString().slice(0,10) : null;
+        
+        // Filtro por rango de fechas
+        if (filterDateStart && iso < filterDateStart) return false;
+        if (filterDateEnd && iso > filterDateEnd) return false;
+        
+        // Filtro por usuario
+        if (filterUser && r.assignedUser !== filterUser) return false;
+        
+        // Filtro por nombre de persona
+        if (filterPerson && !(r.personName||"").toLowerCase().includes(filterPerson)) return false;
+        
+        return true;
+      });
+    }
+
     /* ========= Render de registros + estadísticas MODIFICADA ========= */
     function renderRecords(records){
-      const filterDate=document.getElementById("filterDate").value; // YYYY-MM-DD
-      const filterUser=document.getElementById("filterUser").value;
-      const filterPerson=document.getElementById("filterPerson").value.toLowerCase();
       const container=document.getElementById("recordsContainer");
       container.innerHTML="";
       let stats={total:0,presencial:0,telefonica:0,whatsapp:0,zimbra:0};
 
-      const filtered = records.filter(r=>{
-        const fechaObj = r.timestamp ? new Date(r.timestamp) : null;
-        const iso = fechaObj ? new Date(fechaObj.getTime() - (fechaObj.getTimezoneOffset()*60000)).toISOString().slice(0,10) : null;
-        if(filterDate && iso !== filterDate) return false;
-        if(filterUser && r.assignedUser!==filterUser) return false;
-        if(filterPerson && !(r.personName||"").toLowerCase().includes(filterPerson)) return false;
-        
-        // CÁLCULO DE ESTADÍSTICAS (SOBRE TODOS LOS FILTRADOS)
+      // Usar la función de filtrado común
+      const filtered = getFilteredRecords(records);
+
+      // Calcular estadísticas
+      filtered.forEach(r => {
         stats.total++; 
         if(stats[r.type]!==undefined) stats[r.type]++;
-        return true;
       });
 
       // APLICAR PAGINACIÓN
@@ -486,7 +731,6 @@
           <div class="record-actions">
             <button class="btn btn-secondary" onclick='viewRecord(${JSON.stringify(r)})' title="Ver detalles">👁️</button>
             <button class="btn btn-primary" onclick='editRecord(${JSON.stringify(r)})' title="Editar">✏️</button>
-            <button class="btn btn-primary" onclick='updateRecord(${JSON.stringify(r.id)})' title="Actualizar">🔄</button>
           </div>`;
         container.appendChild(div);
       });
@@ -572,22 +816,6 @@
       assignedUser.value=r.assignedUser||"";
       description.value=r.description||"";
       window.scrollTo({top:0,behavior:"smooth"});
-    }
-
-    // Actualizar (toma valores del form)
-    window.updateRecord=async(id)=>{
-      try {
-        await update(ref(db, "atencion/" + id), {
-          personName: personName.value,
-          type: attentionType.value,
-          assignedUser: assignedUser.value,
-          description: description.value
-        });
-        alert("Registro actualizado");
-      } catch(err){
-        console.error("Error al actualizar: ", err);
-        alert("No se pudo actualizar el registro.");
-      }
     }
 
     document.addEventListener("DOMContentLoaded",init);
