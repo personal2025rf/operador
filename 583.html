@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Art 583 CCyC – Defensoría Civil y Comercial 6 (con Realtime Database)</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Variables CSS actualizadas según causas.html */
         :root {
             --primary-blue: #007bff;
             --primary-light-blue: #e7f4ff;
@@ -51,74 +51,162 @@
             --radius: 12px;
             --shadow: 0 4px 15px rgba(0,0,0,.08);
         }
+
+        /* Estilos base mejorados */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: var(--font-family);
             background-color: var(--background-default);
             color: var(--text-primary);
             line-height: 1.5;
             min-height: 100vh;
-            padding: var(--spacing-m);
         }
 
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-        }
-
+        /* Header mejorado */
         .header {
             background-color: var(--background-header);
-            border-radius: var(--border-radius-default);
-            padding: var(--spacing-l);
-            margin-bottom: var(--spacing-l);
+            border-bottom: 1px solid var(--border-default);
+            padding: var(--spacing-s) var(--spacing-m);
+            position: sticky;
+            top: 0;
+            z-index: 100;
             box-shadow: var(--shadow-subtle);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: var(--h1-size);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary-blue);
+        }
+
+        /* Contenedor principal mejorado */
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: var(--spacing-m) var(--spacing-gutter);
+        }
+
+        /* Tarjetas de resumen (KPIs) */
+        .kpi-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .kpi-title {
+            font-size: var(--h2-size);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-m);
+        }
+
+        .kpi-cards {
+            display: flex;
+            gap: var(--spacing-m);
+            overflow-x: auto;
+            padding-bottom: var(--spacing-s);
+        }
+
+        .kpi-card {
+            background-color: var(--background-card);
+            padding: var(--spacing-m) var(--spacing-l);
+            border-radius: var(--border-radius-default);
             border: 1px solid var(--border-default);
             text-align: center;
-        }
-
-        .header h1, .header h2 { 
-            color: var(--text-primary); 
-            font-weight: var(--font-weight-bold); 
-        }
-        
-        .header h3 { 
-            font-size: clamp(1.1rem, 2.8vw, 1.4rem); 
-            margin-bottom: var(--spacing-s); 
-            color: var(--text-primary);
-        }
-
-        .article-info {
-            background: var(--secondary-gray);
-            border-left: 4px solid var(--primary-blue);
-            padding: var(--spacing-m);
-            margin: var(--spacing-m) 0;
-            border-radius: var(--border-radius-default);
-            font-size: clamp(0.9rem, 2.2vw, 0.95rem);
-            line-height: 1.6;
-        }
-
-        .article-info h3 { 
-            color: var(--primary-blue); 
-            margin-bottom: var(--spacing-s); 
-            font-size: clamp(1.05rem, 3.2vw, 1.15rem); 
-        }
-
-        .controls {
-            background-color: var(--background-card);
-            border-radius: var(--border-radius-default);
-            padding: var(--spacing-m);
-            margin-bottom: var(--spacing-l);
             box-shadow: var(--shadow-subtle);
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 180px;
+            flex: 1;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .kpi-card.total {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+        }
+
+        .kpi-card.pendiente {
+            border-left: 4px solid var(--status-warning);
+        }
+
+        .kpi-card.resuelto {
+            border-left: 4px solid var(--status-success);
+        }
+
+        .kpi-card.en-proceso {
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .kpi-number {
+            font-size: var(--display-size);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .kpi-card.total .kpi-number {
+            color: var(--text-light);
+        }
+
+        .kpi-label {
+            font-size: var(--caption-size);
+            font-weight: var(--font-weight-regular);
+            text-transform: uppercase;
+        }
+
+        .kpi-card.total .kpi-label {
+            color: var(--text-light);
+        }
+
+        /* Controles mejorados */
+        .controls-section {
+            background-color: var(--background-card);
+            padding: var(--spacing-m);
+            border-radius: var(--border-radius-default);
             border: 1px solid var(--border-default);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-subtle);
         }
 
-        .controls-row { 
-            display: flex; 
-            gap: var(--spacing-s); 
-            align-items: center; 
-            flex-wrap: wrap; 
+        .controls-title {
+            font-size: var(--h2-size);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-m);
         }
 
-        .btn {
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-m);
+        }
+
+        .controls-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .controls-label {
+            display: block;
+            font-size: var(--body-regular-size);
+            margin-bottom: var(--spacing-xs);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        /* Botones mejorados */
+        .button {
             background-color: var(--primary-blue);
             color: var(--text-light);
             border: none;
@@ -131,39 +219,53 @@
             align-items: center;
             gap: var(--spacing-xs);
             font-weight: var(--font-weight-semibold);
-            text-decoration: none;
         }
 
-        .btn:hover {
-            background-color: var(--primary-dark-blue);
+        .button:hover {
+            opacity: 0.9;
         }
 
-        .btn-success {
+        .button-success {
             background-color: var(--status-success);
         }
 
-        .btn-warning {
+        .button-warning {
             background-color: var(--status-warning);
             color: var(--text-primary);
         }
 
-        .search-box { 
-            flex: 1; 
-            min-width: min(320px, 100%); 
-            padding: var(--spacing-s); 
-            border: 1px solid var(--border-default); 
-            border-radius: var(--border-radius-default); 
-            font-size: var(--body-regular-size); 
-            transition: border-color .2s ease; 
+        .button-danger {
+            background-color: var(--status-danger);
         }
 
-        .search-box:focus { 
-            outline: none; 
-            border-color: var(--primary-blue); 
-            box-shadow: 0 0 0 3px rgba(0,123,255,.1); 
+        .button-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
         }
 
-        /* ESTILOS DE TABLA SIMILARES A CAUSAS.HTML */
+        /* Búsqueda mejorada */
+        .search-box {
+            flex: 1;
+            min-width: min(320px, 100%);
+            padding: var(--spacing-s);
+            border: 1px solid var(--border-default);
+            border-radius: var(--border-radius-default);
+            font-size: var(--body-regular-size);
+            transition: border-color .2s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0,123,255,.1);
+        }
+
+        /* Tabla mejorada */
         .table-section {
             background-color: var(--background-card);
             border-radius: var(--border-radius-default);
@@ -188,6 +290,7 @@
 
         .table-wrap {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .data-table {
@@ -222,8 +325,8 @@
             background-color: var(--secondary-gray);
         }
 
-        /* Estilos para tipos de atención */
-        .tipo-pill {
+        /* Estilos para estados y prioridades */
+        .status-pill, .priority-pill {
             display: inline-block;
             padding: 4px 8px;
             border-radius: 6px;
@@ -233,32 +336,27 @@
             text-transform: uppercase;
         }
         
-        .tipo-presencial { background-color: var(--status-success); }
-        .tipo-telefonica { background-color: var(--status-warning); color: var(--text-primary); }
-        .tipo-whatsapp { background-color: #25D366; }
-        .tipo-zimbra { background-color: var(--status-danger); }
+        .status-pendiente { background-color: var(--status-warning); color: var(--text-primary); }
+        .status-en-proceso { background-color: var(--primary-blue); }
+        .status-resuelto { background-color: var(--status-success); }
+        
+        .priority-normal { background-color: var(--secondary-dark-gray); }
+        .priority-alta { background-color: var(--status-warning); color: var(--text-primary); }
+        .priority-urgente { background-color: var(--status-danger); }
 
+        /* Acciones en tabla */
         .actions {
             display: flex;
             gap: var(--spacing-xs);
             flex-wrap: wrap;
         }
 
-        .actions .btn {
+        .actions .button {
             padding: 6px 10px;
             font-size: var(--caption-size);
         }
 
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
+        /* Mensaje sin casos */
         .no-cases { 
             text-align: center; 
             padding: 48px 16px; 
@@ -267,7 +365,7 @@
             font-size: 1.05rem; 
         }
 
-        /* MODALES - Mantenemos los estilos originales pero con nueva paleta */
+        /* MODALES mejorados */
         .modal { 
             display: none; 
             position: fixed; 
@@ -275,50 +373,62 @@
             inset: 0; 
             width: 100%; 
             height: 100%; 
-            background-color: rgba(0,0,0,.5); 
-            backdrop-filter: blur(5px); 
-            padding: 10px; 
+            background-color: rgba(0,0,0,.6); 
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
         .modal-content { 
             background: var(--background-card); 
-            margin: 0 auto; 
-            padding: 0; 
-            border-radius: var(--radius); 
-            width: min(100%, 900px); 
-            max-height: 92vh; 
-            overflow-y: auto; 
-            box-shadow: 0 20px 60px rgba(0,0,0,.3); 
-            animation: modalSlideIn .25s ease; 
+            border-radius: var(--radius);
+            max-width: 980px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            animation: fadeIn .25s ease;
         }
 
-        @keyframes modalSlideIn { 
-            from { opacity: 0; transform: translateY(-30px); } 
-            to { opacity: 1; transform: translateY(0); } 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .modal-header { 
-            background: var(--primary-blue); 
-            color: var(--text-light); 
-            padding: 16px 20px; 
-            border-radius: var(--radius) var(--radius) 0 0; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            gap: 10px; 
-            position: sticky; 
-            top: 0; 
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: var(--primary-blue);
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: var(--radius) var(--radius) 0 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
         }
 
-        .modal-header h2 { 
-            margin: 0; 
-            font-size: 1.2rem; 
+        .modal-body {
+            padding: 16px;
+            overflow-y: auto;
         }
 
-        .modal-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
+        .modal-actions {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            padding: 12px 16px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+            z-index: 5;
+            border-radius: 0 0 var(--radius) var(--radius);
         }
 
         .close { 
@@ -333,10 +443,7 @@
             opacity: .7; 
         }
 
-        .modal-body { 
-            padding: 20px; 
-        }
-
+        /* Formularios mejorados */
         .form-group { 
             margin-bottom: 16px; 
         }
@@ -350,7 +457,7 @@
 
         .form-group input, .form-group select, .form-group textarea { 
             width: 100%; 
-            padding: 12px; 
+            padding: 10px 12px; 
             border: 1px solid var(--border-default); 
             border-radius: var(--border-radius-default); 
             font-size: var(--body-regular-size); 
@@ -413,30 +520,117 @@
             color: var(--text-secondary); 
         }
 
+        /* Información del artículo */
+        .article-info {
+            background: var(--secondary-gray);
+            border-left: 4px solid var(--primary-blue);
+            padding: var(--spacing-m);
+            margin: var(--spacing-m) 0;
+            border-radius: var(--border-radius-default);
+            font-size: clamp(0.9rem, 2.2vw, 0.95rem);
+            line-height: 1.6;
+        }
+
+        .article-info h3 { 
+            color: var(--primary-blue); 
+            margin-bottom: var(--spacing-s); 
+            font-size: clamp(1.05rem, 3.2vw, 1.15rem); 
+        }
+
+        /* Paginación */
+        #paginacion-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-m);
+            margin-top: var(--spacing-m);
+            background: var(--background-card);
+            border-radius: var(--border-radius-default);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .page-info {
+            font-size: var(--body-regular-size);
+            color: var(--text-secondary);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--spacing-s);
+        }
+
         /* Responsive */
-        @media (max-width: 992px) {
-            .container { 
-                padding: var(--spacing-s); 
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 100%;
+                padding: var(--spacing-s);
             }
             
-            .form-row { 
-                grid-template-columns: 1fr; 
+            .kpi-cards {
+                gap: var(--spacing-s);
+            }
+            
+            .kpi-card {
+                min-width: 160px;
+                padding: var(--spacing-s) var(--spacing-m);
+            }
+            
+            .controls-row {
+                gap: var(--spacing-s);
+            }
+            
+            .controls-group {
+                min-width: 140px;
+            }
+
+            .modal-content {
+                max-width: 95%;
             }
         }
 
         @media (max-width: 768px) {
-            .header { 
-                padding: var(--spacing-m); 
+            .header-content {
+                flex-direction: column;
+                gap: var(--spacing-s);
+                text-align: center;
             }
             
-            .controls-row { 
-                flex-direction: column; 
-                align-items: stretch; 
+            .kpi-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                overflow-x: visible;
             }
             
-            .modal-content { 
-                width: 100%; 
-                max-height: 94vh; 
+            .kpi-card {
+                min-width: auto;
+            }
+            
+            .controls-row {
+                flex-direction: column;
+            }
+            
+            .controls-group {
+                min-width: auto;
+            }
+            
+            #paginacion-container {
+                flex-direction: column;
+                gap: var(--spacing-m);
+                text-align: center;
+            }
+            
+            .table-title {
+                padding: var(--spacing-s);
+            }
+            
+            .data-table th, 
+            .data-table td {
+                padding: var(--spacing-s);
+            }
+
+            .form-row { 
+                grid-template-columns: 1fr; 
             }
             
             .detail-item { 
@@ -452,6 +646,14 @@
             .actions {
                 justify-content: center;
             }
+
+            .modal-body {
+                padding: var(--spacing-s);
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 576px) {
@@ -459,49 +661,159 @@
                 padding: var(--spacing-xs);
             }
             
-            .header,
-            .controls,
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-card {
+                padding: var(--spacing-m);
+            }
+            
+            .kpi-number {
+                font-size: var(--h1-size);
+            }
+            
+            .controls-section,
             .table-section {
                 padding: var(--spacing-s);
             }
             
-            .data-table th, 
-            .data-table td {
-                padding: var(--spacing-s);
+            .controls-title,
+            .table-title {
+                font-size: var(--body-large-size);
+            }
+
+            .modal-content {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
             }
 
             .modal-header,
-            .modal-body {
+            .modal-body,
+            .modal-actions {
                 padding: var(--spacing-s);
+            }
+            
+            .controls-group {
+                width: 100%;
+            }
+            
+            .button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .table-wrap {
+                margin: 0 -8px;
+                padding: 0 8px;
+            }
+            
+            .data-table {
+                min-width: 100%;
+            }
+            
+            .status-pill, .priority-pill {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+            
+            .actions {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .actions .button {
+                width: 100%;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .container {
+                padding: 4px;
+            }
+            
+            .kpi-card {
+                padding: 10px;
+            }
+            
+            .controls-section,
+            .table-section {
+                padding: 8px;
+            }
+            
+            .data-table th, 
+            .data-table td {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            
+            .button {
+                padding: 8px 12px;
+                font-size: 0.85rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h3>Registro Art 583 CCyC – Defensoría Civil y Comercial 6</h3>
-            <div class="article-info">
-                <h3>ARTÍCULO 583. Reclamación en supuestos de filiación con sola maternidad</h3>
-                <p>El Registro Civil debe comunicar al Ministerio Público cuando un niño/a figure sólo con filiación materna, procurando la determinación de paternidad y reconocimiento. Debe instarse a la madre a suministrar el nombre del presunto padre y datos para su individualización, bajo juramento previo aviso de consecuencias legales.</p>
-                <p>Antes de remitir la comunicación, el Registro cita e informa a la madre sobre derechos y deberes. Cumplido ello, se remiten actuaciones al Ministerio Público para promover acción judicial.</p>
-            </div>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Art 583 CCyC – Defensoría Civil y Comercial 6</div>
+            <button class="button button-success" onclick="openModal('add')">
+                <i class="fas fa-plus"></i> Nuevo Caso
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="article-info">
+            <h3>ARTÍCULO 583. Reclamación en supuestos de filiación con sola maternidad</h3>
+            <p>El Registro Civil debe comunicar al Ministerio Público cuando un niño/a figure sólo con filiación materna, procurando la determinación de paternidad y reconocimiento. Debe instarse a la madre a suministrar el nombre del presunto padre y datos para su individualización, bajo juramento previo aviso de consecuencias legales.</p>
+            <p>Antes de remitir la comunicación, el Registro cita e informa a la madre sobre derechos y deberes. Cumplido ello, se remiten actuaciones al Ministerio Público para promover acción judicial.</p>
         </div>
 
-        <div class="controls">
+        <!-- KPIs mejorados -->
+        <section class="kpi-section">
+            <h2 class="kpi-title">Resumen de Casos</h2>
+            <div class="kpi-cards" id="kpiCards">
+                <div class="kpi-card total">
+                    <div class="kpi-number" id="totalCasos">0</div>
+                    <div class="kpi-label">Total de Casos</div>
+                </div>
+                <div class="kpi-card pendiente">
+                    <div class="kpi-number" id="casosPendientes">0</div>
+                    <div class="kpi-label">Pendientes</div>
+                </div>
+                <div class="kpi-card en-proceso">
+                    <div class="kpi-number" id="casosEnProceso">0</div>
+                    <div class="kpi-label">En Proceso</div>
+                </div>
+                <div class="kpi-card resuelto">
+                    <div class="kpi-number" id="casosResueltos">0</div>
+                    <div class="kpi-label">Resueltos</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controles mejorados -->
+        <section class="controls-section">
+            <h2 class="controls-title">Filtros y Acciones</h2>
             <div class="controls-row">
-                <button class="btn btn-success" onclick="openModal('add')">
-                    <i class="fas fa-plus"></i> Nuevo Caso
-                </button>
-                <input type="text" class="search-box" id="searchInput" placeholder="Buscar casos por cualquier campo..." onkeyup="filterCases()" />
-                <button class="btn btn-warning" onclick="printAllCases()">
-                    <i class="fas fa-print"></i> Imprimir Todo
-                </button>
+                <div class="controls-group">
+                    <input type="text" class="search-box" id="searchInput" placeholder="Buscar casos por cualquier campo..." onkeyup="filterCases()" />
+                </div>
+                <div class="controls-group">
+                    <button class="button button-warning" onclick="printAllCases()">
+                        <i class="fas fa-print"></i> Imprimir Todo
+                    </button>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- TABLA ESTILO CAUSAS.HTML -->
-        <div class="table-section">
+        <!-- Tabla mejorada -->
+        <section class="table-section">
             <div class="table-title">
                 <span>Registro de Casos</span>
                 <div style="display: flex; gap: 8px; align-items: center;">
@@ -534,14 +846,14 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
         
         <!-- Controles de paginación -->
-        <div id="paginacion-container" style="display: none; justify-content: space-between; align-items: center; padding: var(--spacing-m); margin-top: var(--spacing-m); background: var(--background-card); border-radius: var(--border-radius-default); box-shadow: var(--shadow-subtle);">
-            <div class="page-info" style="font-size: var(--body-regular-size); color: var(--text-secondary); font-weight: var(--font-weight-semibold);"></div>
-            <div class="nav-buttons" style="display: flex; gap: var(--spacing-s);"></div>
+        <div id="paginacion-container" style="display: none;">
+            <div class="page-info"></div>
+            <div class="nav-buttons"></div>
         </div>
-    </div>
+    </main>
 
     <!-- Modal para agregar/editar casos -->
     <div id="caseModal" class="modal">
@@ -549,7 +861,7 @@
             <div class="modal-header">
                 <h2 id="modalTitle">Nuevo Caso</h2>
                 <div class="modal-actions">
-                    <button class="btn btn-warning" onclick="printCaseFromForm()">
+                    <button class="button button-warning" onclick="printCaseFromForm()">
                         <i class="fas fa-print"></i> Imprimir
                     </button>
                     <span class="close" onclick="closeModal()">&times;</span>
@@ -677,16 +989,15 @@
                             <textarea id="informacionAdicionalPadre" placeholder="Información útil para individualización y paradero"></textarea>
                         </div>
                     </div>
-
-                    <div style="text-align:center; margin-top: 20px;">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Guardar Caso
-                        </button>
-                        <button type="button" class="btn" onclick="closeModal()" style="margin-left:10px;">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="button button-success" form="caseForm">
+                    <i class="fas fa-save"></i> Guardar Caso
+                </button>
+                <button type="button" class="button button-secondary" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
             </div>
         </div>
     </div>
@@ -732,8 +1043,10 @@
             cases = remote;
             localStorage.setItem('defensoriaCases', JSON.stringify(cases));
             renderCases();
+            actualizarKPIs();
         }, (err) => {
             renderCases();
+            actualizarKPIs();
         });
 
         // Variables de paginación
@@ -744,6 +1057,7 @@
         // Cargar UI al iniciar
         document.addEventListener('DOMContentLoaded', function() {
             renderCases();
+            actualizarKPIs();
         });
 
         // UI logic
@@ -760,7 +1074,7 @@
                 currentEditingId = caseId; 
                 loadCaseData(caseId); 
             }
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
         }
 
         window.closeModal = function() { 
@@ -820,6 +1134,7 @@
                 if (idx !== -1) cases[idx] = caseData; else cases.push(caseData);
                 localStorage.setItem('defensoriaCases', JSON.stringify(cases));
                 renderCases();
+                actualizarKPIs();
                 closeModal();
             } catch (e) {
                 alert('Error al guardar en Realtime Database. Revise la conexión o reglas de seguridad.');
@@ -833,6 +1148,7 @@
                 cases = cases.filter(c => c.id !== caseId);
                 localStorage.setItem('defensoriaCases', JSON.stringify(cases));
                 renderCases();
+                actualizarKPIs();
             } catch (e) {
                 alert('No se pudo eliminar el caso en Realtime Database.');
             }
@@ -891,16 +1207,16 @@
                     <td>${caseData.nombreMenor || ''} ${caseData.apellidoMenor || ''}</td>
                     <td>${caseData.nombreMadre || ''} ${caseData.apellidoMadre || ''}</td>
                     <td>${formatDate(caseData.fechaIngreso) || ''}</td>
-                    <td><span class="tipo-pill tipo-${caseData.estado}">${getStatusText(caseData.estado)}</span></td>
-                    <td><span class="tipo-pill tipo-${caseData.prioridad}">${getPriorityText(caseData.prioridad)}</span></td>
+                    <td><span class="status-pill status-${caseData.estado}">${getStatusText(caseData.estado)}</span></td>
+                    <td><span class="priority-pill priority-${caseData.prioridad}">${getPriorityText(caseData.prioridad)}</span></td>
                     <td class="actions">
-                        <button class="btn btn-icon" onclick="viewCase('${caseData.id}')" title="Ver">
+                        <button class="button button-icon" onclick="viewCase('${caseData.id}')" title="Ver">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn btn-icon" onclick="openModal('edit', '${caseData.id}')" title="Editar">
+                        <button class="button button-icon" onclick="openModal('edit', '${caseData.id}')" title="Editar">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-icon" style="background-color: var(--status-danger);" onclick="deleteCase('${caseData.id}')" title="Eliminar">
+                        <button class="button button-icon button-danger" onclick="deleteCase('${caseData.id}')" title="Eliminar">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -926,10 +1242,10 @@
             pageInfo.innerHTML = `Página ${paginaActual} de ${totalPages} | Mostrando ${recordsOnPage} de ${totalRecords} registros`;
             
             navButtons.innerHTML = `
-                <button class="btn" ${paginaActual === 1 ? 'disabled' : ''} onclick="changePage(${paginaActual - 1})">
+                <button class="button" ${paginaActual === 1 ? 'disabled' : ''} onclick="changePage(${paginaActual - 1})">
                     <i class="fas fa-arrow-left"></i> Anterior
                 </button>
-                <button class="btn" ${paginaActual === totalPages ? 'disabled' : ''} onclick="changePage(${paginaActual + 1})">
+                <button class="button" ${paginaActual === totalPages ? 'disabled' : ''} onclick="changePage(${paginaActual + 1})">
                     Siguiente <i class="fas fa-arrow-right"></i>
                 </button>
             `;
@@ -939,6 +1255,19 @@
             paginaActual = page;
             renderTablaPaginada();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Actualizar KPIs
+        function actualizarKPIs() {
+            const totalCasos = cases.length;
+            const casosPendientes = cases.filter(c => c.estado === 'pendiente').length;
+            const casosEnProceso = cases.filter(c => c.estado === 'en-proceso').length;
+            const casosResueltos = cases.filter(c => c.estado === 'resuelto').length;
+            
+            document.getElementById('totalCasos').textContent = totalCasos;
+            document.getElementById('casosPendientes').textContent = casosPendientes;
+            document.getElementById('casosEnProceso').textContent = casosEnProceso;
+            document.getElementById('casosResueltos').textContent = casosResueltos;
         }
 
         // Utilidades
@@ -999,7 +1328,7 @@
             const inputs = form.querySelectorAll('input, select, textarea');
             inputs.forEach(input => input.disabled = true);
             
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
             
             // Restaurar cuando se cierre
             const restoreForm = function() {
