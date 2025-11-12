@@ -205,17 +205,6 @@
         </div>
     </div>
 
-    <div class="overlay" id="deleteOverlay"></div>
-    <div class="delete-confirmation" id="deleteConfirmation">
-        <h5 class="text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación</h5>
-        <p>¿Está seguro de que desea eliminar este expediente?</p>
-        <p class="fw-bold" id="expedienteToDelete"></p>
-        <div class="d-flex justify-content-end gap-2 mt-4">
-            <button class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
-            <button class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
-        </div>
-    </div>
-
     <div class="modal fade" id="expedienteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -400,11 +389,6 @@
         const btnPrintAll = document.getElementById('btnPrintAll');
         const numCausaInput = document.getElementById('numCausa');
         const numCausaFeedback = document.getElementById('numCausaFeedback');
-        const deleteConfirmation = document.getElementById('deleteConfirmation');
-        const deleteOverlay = document.getElementById('deleteOverlay');
-        const expedienteToDelete = document.getElementById('expedienteToDelete');
-        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const activeFiltersContainer = document.getElementById('activeFiltersContainer');
         const activeFilters = document.getElementById('activeFilters');
 
@@ -429,7 +413,6 @@
         let allExpedientes = [];
         let filteredExpedientes = [];
         let currentFilters = {};
-        let deleteExpedienteId = null;
         
         // Variables para el gráfico
         let userStatsChart = null;
@@ -857,9 +840,6 @@
                             <button class="btn btn-sm btn-outline-warning edit-btn" data-id="${data.id}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${data.id}">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
                         </td>
                     </tr>
                 `;
@@ -890,13 +870,6 @@
                     editExpediente(e.currentTarget.dataset.id);
                 });
             });
-
-            expedientesContainer.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showDeleteConfirmation(e.currentTarget.dataset.id);
-                });
-            });
             
             expedientesContainer.querySelectorAll('.expediente-row').forEach(row => {
                 row.addEventListener('click', (e) => {
@@ -905,48 +878,6 @@
                     }
                 });
             });
-        }
-        
-        // Función para mostrar confirmación de eliminación
-        function showDeleteConfirmation(id) {
-            const expediente = allExpedientes.find(e => e.id === id);
-            if (!expediente) return;
-            
-            deleteExpedienteId = id;
-            expedienteToDelete.textContent = `${expediente.numCausa} - ${expediente.usuarioAsignado}`;
-            
-            deleteConfirmation.style.display = 'block';
-            deleteOverlay.style.display = 'block';
-        }
-        
-        // Función para ocultar confirmación de eliminación
-        function hideDeleteConfirmation() {
-            deleteConfirmation.style.display = 'none';
-            deleteOverlay.style.display = 'none';
-            deleteExpedienteId = null;
-        }
-        
-        // Event listeners para confirmación de eliminación
-        cancelDeleteBtn.addEventListener('click', hideDeleteConfirmation);
-        deleteOverlay.addEventListener('click', hideDeleteConfirmation);
-        
-        confirmDeleteBtn.addEventListener('click', async () => {
-            if (deleteExpedienteId) {
-                await deleteExpediente(deleteExpedienteId);
-                hideDeleteConfirmation();
-            }
-        });
-        
-        // Función para eliminar un expediente
-        async function deleteExpediente(id) {
-            try {
-                await expedientesRef.doc(id).delete();
-                showToast('Expediente eliminado con éxito!', 'success');
-                loadExpedientes();
-            } catch (error) {
-                console.error("Error al eliminar el expediente: ", error);
-                showToast("Error al eliminar el expediente: " + error.message, 'error');
-            }
         }
         
         // Función para renderizar la paginación
