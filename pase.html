@@ -149,6 +149,10 @@
                                     <input class="form-check-input" type="checkbox" id="remisionFilter">
                                     <label class="form-check-label" for="remisionFilter">Con Remisión</label>
                                 </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="archivoFilter">
+                                    <label class="form-check-label" for="archivoFilter">Archivo</label>
+                                </div>
                             </div>
                         </div>
 
@@ -328,6 +332,14 @@
                             <label for="remisionMotivo" class="form-label">Remisión a otra Defensoría (Motivo)</label>
                             <textarea class="form-control" id="remisionMotivo" rows="2"></textarea>
                         </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="archivoCheck">
+                                <label class="form-check-label" for="archivoCheck">
+                                    Archivo
+                                </label>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -405,6 +417,7 @@
         // NUEVOS FILTROS
         const causaNuevaFilter = document.getElementById('causaNuevaFilter');
         const causaAnteriorFilter = document.getElementById('causaAnteriorFilter');
+        const archivoFilter = document.getElementById('archivoFilter');
 
 
         // Variables para paginación
@@ -503,6 +516,7 @@
             const otrosExpedientesAcumulados = document.getElementById('otrosExpedientesAcumulados').value;
             const devolucionMotivo = document.getElementById('devolucionMotivo').value;
             const remisionMotivo = document.getElementById('remisionMotivo').value;
+            const archivo = document.getElementById('archivoCheck').checked;
 
             if (!numCausa || !usuarioAsignado || !fechaPase || !tipoProceso || !estadoCausa) {
                 showToast('Por favor, complete todos los campos obligatorios.', 'error');
@@ -532,7 +546,8 @@
                 otrosExpedientesCuerda,
                 otrosExpedientesAcumulados,
                 devolucionMotivo,
-                remisionMotivo
+                remisionMotivo,
+                archivo
             };
 
             try {
@@ -704,6 +719,11 @@
                 hasFilters = true;
                 activeFilters.innerHTML += `<span class="badge bg-info text-dark">Con Remisión</span>`;
             }
+
+            if (currentFilters.archivo) {
+                hasFilters = true;
+                activeFilters.innerHTML += `<span class="badge bg-dark">Archivo</span>`;
+            }
             
             activeFiltersContainer.style.display = hasFilters ? 'block' : 'none';
         }
@@ -721,6 +741,7 @@
             // NUEVOS FILTROS
             const showCausaNueva = causaNuevaFilter.checked;
             const showCausaAnterior = causaAnteriorFilter.checked;
+            const showArchivo = archivoFilter.checked;
 
             // Guardar filtros actuales
             currentFilters = {
@@ -733,7 +754,8 @@
                 devolucion: showDevolucion,
                 remision: showRemision,
                 causaNueva: showCausaNueva, 
-                causaAnterior: showCausaAnterior 
+                causaAnterior: showCausaAnterior,
+                archivo: showArchivo
             };
             
             // Mostrar filtros activos
@@ -784,7 +806,10 @@
                                             (showCausaNueva && data.estadoCausa === 'nueva') ||
                                             (showCausaAnterior && data.estadoCausa === 'anterior');
 
-                return matchesSearch && matchesExpedienteAsignado && matchesUser && matchesProceso && matchesDate && matchesSpecialReason && matchesEstadoCausa;
+                // Filtrado por archivo
+                const matchesArchivo = !showArchivo || (showArchivo && data.archivo === true);
+
+                return matchesSearch && matchesExpedienteAsignado && matchesUser && matchesProceso && matchesDate && matchesSpecialReason && matchesEstadoCausa && matchesArchivo;
             });
             
             currentPage = 1;
@@ -1086,6 +1111,7 @@
                     document.getElementById('otrosExpedientesAcumulados').value = data.otrosExpedientesAcumulados || '';
                     document.getElementById('devolucionMotivo').value = data.devolucionMotivo || '';
                     document.getElementById('remisionMotivo').value = data.remisionMotivo || '';
+                    document.getElementById('archivoCheck').checked = data.archivo || false;
                     
                     document.getElementById('expedienteModalTitle').textContent = 'Editar Expediente';
                     document.getElementById('saveExpedienteBtn').textContent = 'Actualizar Expediente';
@@ -1128,6 +1154,7 @@
                             <h6>Motivos Especiales</h6>
                             <p><strong>Devolución a Mesa de Entradas:</strong> ${data.devolucionMotivo || 'N/A'}</p>
                             <p><strong>Remisión a otra Defensoría:</strong> ${data.remisionMotivo || 'N/A'}</p>
+                            <p><strong>Archivo:</strong> ${data.archivo ? 'Sí' : 'No'}</p>
                         </div>
                     `;
                     
@@ -1164,6 +1191,7 @@
                 <h6>Motivos Especiales</h6>
                 <p><strong>Devolución a Mesa de Entradas:</strong> ${expediente.devolucionMotivo || 'N/A'}</p>
                 <p><strong>Remisión a otra Defensoría:</strong> ${expediente.remisionMotivo || 'N/A'}</p>
+                <p><strong>Archivo:</strong> ${expediente.archivo ? 'Sí' : 'No'}</p>
             `;
             
             const printWindow = window.open('', '_blank');
@@ -1256,6 +1284,7 @@
         // NUEVOS EVENT LISTENERS PARA CAUSA NUEVA/ANTERIOR
         causaNuevaFilter.addEventListener('change', applyFilters);
         causaAnteriorFilter.addEventListener('change', applyFilters);
+        archivoFilter.addEventListener('change', applyFilters);
         
         // Asignar evento al botón de imprimir todos
         btnPrintAll.addEventListener('click', imprimirTodosExpedientes);
