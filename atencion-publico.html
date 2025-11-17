@@ -118,17 +118,97 @@
       justify-content: center;
       font-size: 14px;
     }
-    /* Estilos para Paginación */
+    
+    /* Estilos para Paginación Mejorada */
     .pagination-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
     }
-    .pagination-controls select, .pagination-controls button {
-      padding: 6px 10px;
+    .pagination-info {
       font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
     }
+    .pagination-buttons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-pagination {
+      background: var(--secondary-light-gray);
+      border: 1px solid var(--border-default);
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+    .btn-pagination:hover:not(:disabled) {
+      background: var(--border-default);
+    }
+    .btn-pagination:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .page-select {
+      padding: 6px 8px;
+      border: 1px solid var(--border-default);
+      border-radius: 4px;
+      background: #fff;
+      font-size: 13px;
+      color: var(--text);
+      min-width: 60px;
+    }
+    
+    /* Estilos para el nuevo gráfico de estadísticas por usuario */
+    .user-stats-container {
+      margin-top: 20px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .user-stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-default);
+      padding-bottom: 8px;
+    }
+    .user-stats-chart-container {
+      height: 300px;
+      width: 100%;
+    }
+    .user-stats-details {
+      margin-top: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .user-stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .user-stat-item:last-child {
+      border-bottom: none;
+    }
+    .user-stat-name {
+      flex: 1;
+    }
+    .user-stat-count {
+      font-weight: bold;
+      color: var(--accent-dark);
+    }
+    
     /* Compactar en pantallas medianas */
     @media (max-width: 1000px) {
       .main { grid-template-columns: 1fr; }
@@ -137,6 +217,9 @@
       .record .record-actions { grid-column: 1 / -1; }
       .filter-row { width: 100%; }
       .date-range { width: 100%; }
+      .user-stats-chart-container {
+        height: 250px;
+      }
     }
     /* Diseño tipo tarjetas en móviles */
     @media (max-width: 768px) {
@@ -163,8 +246,13 @@
         justify-content: center; 
         width: 100%; 
         margin-top: 8px;
+        flex-direction: column;
+        gap: 8px;
       }
       .chart-container { width: 100%; height: 220px; }
+      .user-stats-chart-container {
+        height: 200px;
+      }
     }
     @media (max-width: 480px) {
       .pagination-controls {
@@ -290,6 +378,19 @@
       </div>
     </div>
 
+    <!-- Nuevo gráfico de estadísticas por usuario -->
+    <div class="user-stats-container">
+      <div class="user-stats-header">
+        <h2>Estadísticas por Usuario</h2>
+      </div>
+      <div class="user-stats-chart-container">
+        <canvas id="userStatsChart"></canvas>
+      </div>
+      <div class="user-stats-details" id="userStatsDetails">
+        <!-- Los detalles se generarán dinámicamente -->
+      </div>
+    </div>
+
     <div class="records-table">
       <div class="table-header">
         <span>Registro de Atenciones</span>
@@ -361,12 +462,12 @@
     const baseRef = ref(db, "atencion");
 
     let statsChart;
+    let userStatsChart; // Gráfico de estadísticas por usuario
     let recordsCache = []; // cache local para filtros/orden
     
-    // VARIABLES DE PAGINACIÓN AÑADIDAS
+    // VARIABLES DE PAGINACIÓN
     let currentPage = 1; 
     const recordsPerPage = 10;
-    // FIN VARIABLES DE PAGINACIÓN AÑADIDAS
 
     const users = ["Bazante Nadia Romina","Boillat Cesar Enrique","Cardozo Maria Raquel","Cedron Noelia Aurora","Corrales Alicia Mariela","Escobar Monica Graciela","Fioravante Romulo","Gonzalez Alberto Misael","Gonzalez Juan Jose","Gudiño Natalia Esther","Magnani Enzo Luciano","Pablos Patricia","Palacios Ana Gabriela","Ortega Lucia Noemi","Ramos Marcelo Gustavo","Riveros Patricia Soledad","Sosa Rita Cecilia"];
 
@@ -407,6 +508,7 @@
       updateClock(); updateStatus();
       setInterval(()=>{updateClock();updateStatus();},60000);
       initChart();
+      initUserStatsChart(); // Inicializar el gráfico de usuarios
       bindPrinting();
       bindFilters();
       startRealtime();
@@ -631,39 +733,67 @@
       window.scrollTo({top: document.querySelector('.records-table').offsetTop, behavior: "smooth"}); // Scroll a la tabla
     }
 
+    // FUNCIÓN DE PAGINACIÓN MEJORADA
     function createPaginationControls(totalRecords, currentPage, recordsPerPage, container){
       container.innerHTML = "";
       const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
+      if (totalRecords === 0) {
+        const noRecords = document.createElement("span");
+        noRecords.className = "pagination-info";
+        noRecords.textContent = "No hay registros";
+        container.appendChild(noRecords);
+        return;
+      }
+
+      // Información de registros
+      const info = document.createElement("span");
+      info.className = "pagination-info";
+      const start = (currentPage - 1) * recordsPerPage + 1;
+      const end = Math.min(currentPage * recordsPerPage, totalRecords);
+      info.textContent = `${start}-${end} de ${totalRecords} registros`;
+      container.appendChild(info);
+
       if (totalPages <= 1) return;
 
+      // Controles de paginación
+      const paginationButtons = document.createElement("div");
+      paginationButtons.className = "pagination-buttons";
+      
+      // Botón anterior
       const prevBtn = document.createElement("button");
-      prevBtn.className = "btn btn-secondary";
-      prevBtn.textContent = "« Anterior";
+      prevBtn.className = "btn-pagination";
+      prevBtn.innerHTML = "&laquo;";
+      prevBtn.title = "Página anterior";
       prevBtn.disabled = currentPage === 1;
       prevBtn.onclick = () => window.goToPage(currentPage - 1);
-      container.appendChild(prevBtn);
+      paginationButtons.appendChild(prevBtn);
 
-      const select = document.createElement("select");
-      select.onchange = (e) => window.goToPage(parseInt(e.target.value));
+      // Selector de página
+      const pageSelect = document.createElement("select");
+      pageSelect.className = "page-select";
+      pageSelect.onchange = (e) => window.goToPage(parseInt(e.target.value));
       
       for (let i = 1; i <= totalPages; i++) {
         const option = document.createElement("option");
         option.value = i;
-        option.textContent = `Página ${i}`;
+        option.textContent = i;
         if (i === currentPage) option.selected = true;
-        select.appendChild(option);
+        pageSelect.appendChild(option);
       }
-      container.appendChild(select);
+      paginationButtons.appendChild(pageSelect);
 
+      // Botón siguiente
       const nextBtn = document.createElement("button");
-      nextBtn.className = "btn btn-secondary";
-      nextBtn.textContent = "Siguiente »";
+      nextBtn.className = "btn-pagination";
+      nextBtn.innerHTML = "&raquo;";
+      nextBtn.title = "Página siguiente";
       nextBtn.disabled = currentPage === totalPages;
       nextBtn.onclick = () => window.goToPage(currentPage + 1);
-      container.appendChild(nextBtn);
+      paginationButtons.appendChild(nextBtn);
+      
+      container.appendChild(paginationButtons);
     }
-    // FIN FUNCIÓN DE PAGINACIÓN
 
     // Función para obtener registros filtrados (usada en renderRecords y en impresión)
     function getFilteredRecords(records) {
@@ -708,13 +838,12 @@
       // APLICAR PAGINACIÓN
       const totalFiltered = filtered.length;
       const startIndex = (currentPage - 1) * recordsPerPage;
-      const endIndex = startIndex + recordsPerPage;
+      const endIndex = Math.min(startIndex + recordsPerPage, totalFiltered);
       const paginatedRecords = filtered.slice(startIndex, endIndex);
 
       // CREAR CONTROLES DE PAGINACIÓN
       const paginationContainer = document.getElementById("paginationControls");
       createPaginationControls(totalFiltered, currentPage, recordsPerPage, paginationContainer);
-      // FIN PAGINACIÓN
 
       paginatedRecords.forEach(r=>{ // Iterar sobre los registros paginados
         const fechaObj = r.timestamp ? new Date(r.timestamp) : null;
@@ -746,6 +875,7 @@
       document.getElementById("whatsappCount").textContent=stats.whatsapp;
       document.getElementById("zimbraCount").textContent=stats.zimbra;
       updateChart(stats);
+      updateUserStats(filtered); // Actualizar estadísticas por usuario
     }
 
     /* ========= Gráfico ========= */
@@ -770,6 +900,107 @@
     function updateChart(stats){
       statsChart.data.datasets[0].data=[stats.presencial,stats.telefonica,stats.whatsapp,stats.zimbra];
       statsChart.update();
+    }
+
+    /* ========= Nuevo Gráfico de Estadísticas por Usuario ========= */
+    function initUserStatsChart() {
+      const ctx = document.getElementById('userStatsChart').getContext('2d');
+      userStatsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Atenciones por Usuario',
+            data: [],
+            backgroundColor: 'rgba(13, 110, 253, 0.7)',
+            borderColor: 'rgba(13, 110, 253, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Cantidad de Atenciones'
+              }
+            },
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Atenciones: ${context.raw}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateUserStats(filteredRecords) {
+      const statsByUser = {};
+      
+      // Contar atenciones por usuario
+      filteredRecords.forEach(record => {
+        const user = record.assignedUser;
+        if (!statsByUser[user]) {
+          statsByUser[user] = 0;
+        }
+        statsByUser[user]++;
+      });
+      
+      // Ordenar usuarios por cantidad de atenciones (descendente)
+      const sortedUsers = Object.keys(statsByUser).sort((a, b) => statsByUser[b] - statsByUser[a]);
+      
+      // Actualizar el gráfico
+      userStatsChart.data.labels = sortedUsers;
+      userStatsChart.data.datasets[0].data = sortedUsers.map(user => statsByUser[user]);
+      userStatsChart.update();
+      
+      // Actualizar los detalles
+      const statsDetails = document.getElementById('userStatsDetails');
+      if (sortedUsers.length === 0) {
+        statsDetails.innerHTML = '<p class="text-center text-muted">No hay datos para mostrar</p>';
+      } else {
+        let detailsHtml = `
+          <div class="user-stat-item" style="font-weight: bold; background-color: var(--secondary-light-gray);">
+            <div class="user-stat-name">Usuario</div>
+            <div class="user-stat-count">Cantidad</div>
+          </div>
+        `;
+        
+        sortedUsers.forEach(user => {
+          detailsHtml += `
+            <div class="user-stat-item">
+              <div class="user-stat-name">${user}</div>
+              <div class="user-stat-count">${statsByUser[user]}</div>
+            </div>
+          `;
+        });
+        
+        detailsHtml += `
+          <div class="user-stat-item" style="font-weight: bold; border-top: 2px solid var(--border-default);">
+            <div class="user-stat-name">Total</div>
+            <div class="user-stat-count">${filteredRecords.length}</div>
+          </div>
+        `;
+        
+        statsDetails.innerHTML = detailsHtml;
+      }
     }
 
     /* ========= Alta / Edición / Actualización / Eliminación ========= */
