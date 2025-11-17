@@ -452,7 +452,7 @@
 
     // Horario de atención y feriados (formato DD/MM/AAAA)
     const OPEN_HOUR = 7;
-    const CLOSE_HOUR = 12;
+    const CLOSE_HOUR = 12.5; // 12:30 = 12.5 en formato decimal
     const FERIADOS = [
       // "01/01/2025","24/03/2025","02/04/2025","01/05/2025","09/07/2025","08/12/2025","25/12/2025"
     ];
@@ -492,8 +492,8 @@
       const d = date.getDay(); // 0-dom,6-sab
       if (d === 0 || d === 6) return false;
       if (esFeriado(date)) return false;
-      const h = date.getHours();
-      return h >= OPEN_HOUR && h < CLOSE_HOUR; // 07:00–11:59
+      const h = date.getHours() + date.getMinutes()/60; // Convertir a formato decimal
+      return h >= OPEN_HOUR && h < CLOSE_HOUR; // 07:00–12:29
     }
 
     /* ========= Inicialización ========= */
@@ -699,7 +699,7 @@
       const form=document.getElementById("attentionForm");
       if(oficinaAbierta()){
         ind.className="status-indicator status-open";
-        txt.textContent="Oficina Abierta (Lun–Vie 07:00–12:00)";
+        txt.textContent="Oficina Abierta (Lun–Vie 07:00–12:30)";
         form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=false);
       }else{
         ind.className="status-indicator status-closed";
@@ -1006,7 +1006,7 @@
     /* ========= Alta / Edición / Actualización / Eliminación ========= */
     document.getElementById("attentionForm").addEventListener("submit",async(e)=>{
       e.preventDefault();
-      if(!oficinaAbierta()){ alert("Oficina cerrada (Lun–Vie 07:00–12:00, excepto feriados)."); return; }
+      if(!oficinaAbierta()){ alert("Oficina cerrada (Lun–Vie 07:00–12:30, excepto feriados)."); return; }
       const now=new Date();
       const rec={
         time: fmtHora(now),
